@@ -1,9 +1,14 @@
 let Bmob = require('./bmob')
 
+let sdkType = 'wechatApp'
+if (typeof (tt) !== 'undefined') {
+  sdkType = 'toutiao'
+}
+
 const setHeader = (config) => {
   let header = {
     'content-type': 'application/json',
-    'X-Bmob-SDK-Type': 'wechatApp',
+    'X-Bmob-SDK-Type': sdkType,
     'X-Bmob-Application-Id': config.applicationId,
     'X-Bmob-REST-API-Key': config.applicationKey
   }
@@ -20,7 +25,7 @@ const request = (route, method = 'get', parma = {}) => {
     if (undefined === Bmob.User) {
       Bmob = require('./bmob')
     }
-    var current = Bmob.User.current()
+    let current = Bmob.User.current()
     if (current) {
       header['X-Bmob-Session-Token'] = current.sessionToken
     }

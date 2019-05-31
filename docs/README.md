@@ -13,29 +13,76 @@
 1. 整个SDK，就dist目录下Bmob.*.js 这个文件即可使用全部功能
 2. 目前支持微信小程序、H5、快应用、游戏Cocos、混合App等
 
+**ps：这不只是微信小程序SDK，是跨平台SDK，相关平台都是引入**`Bmob-x.x.x.min.js`
 
+---
 
 **引入：**
 
+压缩包引入
+
 ```
-var Bmob = require('../dist/Bmob-1.0.1.min.js');
+var Bmob = require('../dist/Bmob-x.x.x.min.js');
+```
+或者源码引入（nodejs必须源码引入）
+
+```
+var Bmob = require('./src/lib/app.js');
 ```
 
 
 
-### **初始化**
+### 初始化
 
 ```
 Bmob.initialize("你的Application ID", "你的REST API Key");
 ```
 
 
->
->  `nodejs`请使用源码引入 app.js ，初始化与其他一样
+
+或者包引入方式
+
+安装
 
 ```
-var Bmob = require('./src/lib/app.js');
+npm install hydrogen-js-sdk
 ```
+
+引入
+
+```
+import Bmob from "hydrogen-js-sdk";
+```
+
+使用ES6前端相关框架，建议使用此方式引入。快应用由于网络包不支持npm，暂时不支持npm，头条小程序可以跟小程序一样使用。
+
+
+
+Vue示例
+
+```
+// 安装
+npm install hydrogen-js-sdk
+
+// 打开 main.js
+import Bmob from "hydrogen-js-sdk";
+
+// 初始化
+Bmob.initialize("你的Application ID", "你的REST API Key");
+
+// 挂载到全局使用
+Vue.prototype.Bmob = Bmob
+
+// 项目其他页面使用跟小程序一样使用Bmob对象即可，例如：
+Bmob.User.login('username','password').then(res => {
+   console.log(res)
+ }).catch(err => {
+  console.log(err)
+});
+
+```
+
+
 
 
 
@@ -222,6 +269,18 @@ Bmob.User.signOrLoginByMobilePhone(phone,smsCode).then(res => {
 Bmob.initialize("你的Application ID", "你的REST API Key", "你的MasterKey");
 ```
 
+### 退出登录
+
+ **简介：**
+
+执行退出函数，会退出登录状态，并清理本地全部缓存
+
+**请求示例：**
+
+```
+Bmob.User.logout()
+```
+
 
 
 ### 查询用户
@@ -309,7 +368,7 @@ emailVerified 字段有 3 种状态可以考虑：
 
 **missing** : 用户(User)对象已经被创建，但应用设置并没有开启邮件验证功能； 或者用户(User)对象没有email邮箱。
 
-发送到用户邮箱验证的邮件会在一周内失效
+发送到用户邮箱验证的邮件会在一周内失效，此功能由于邮件滥发，目前已是收费服务，如需验证，请工单联系
 
  **参数说明：**
 
@@ -677,7 +736,7 @@ or
     query.get('objectId').then(res => {
       res.destroy().then(res => {
     console.log(res)
-      }).ctach(err => {
+      }).catch(err => {
     console.log(err)
       })
     }).catch(err => {
@@ -1690,6 +1749,44 @@ query.save().then(res => {
 })
 ```
 
+### 图片缩略图
+
+图片文件服务由第三方厂商又拍云提供 ， 只需要在文件上传成功返回的url后面拼接特定参数即可实现缩放，缩略图，加水印等效果，[如图](http://bmob-cdn-9200.b0.upaiyun.com/2017/04/25/f24b9ef540f1aeb680ebe01ba8543d9f.png!/scale/80/watermark/text/5rC05Y2wCg==)，具体可参考[这里](http://docs.upyun.com/cloud/image/) 。
+
+### 视频缩略图
+
+有时候视频需要动态截取缩略图，可以使用以下接口
+
+**请求参数**
+
+| 参数              		| 类型   	| 必选	| 说明                                    			|
+|-----------------------|-----------|-------|---------------------------------------------------|
+| source 				| string 	| 是  | 视频的存储地址					|
+| save_as 				| string 	| 是  | 截图保存地址					|
+| point   				| string 	| 是  | 截图时间点，格式为 `HH:MM:SS`					|
+
+```
+curl -X POST \
+  http://api2.bmob.cn/2/cdnVedioSnapshot \
+  -H 'content-type: application/json' \
+  -H 'x-bmob-application-id: xxx' \
+  -H 'x-bmob-rest-api-key: xxx' \
+  -d '{"source": "https://bmob-cdn-80.b0.upaiyun.com/2018/08/17/f4ca5b26305348c88ae70818982c1168.mp4", "save_as": "https://bmob-cdn-80.b0.upaiyun.com/f4ca5b26305348c88ae70818982c1161.jpg", "point": "00:00:05"}'
+  
+//{"source": "<视频的存储地址>", "point": "<时间点>", "save_as": "<截图保存地址>"}
+```
+
+**响应**
+
+| 参数        		| 说明         	|
+|:------------------|---------------|
+| status_code   	| 状态码        	|
+| message       	| 返回信息      	|
+| content_type  	| 截图类型       |
+| content_length	| 截图大小      	|
+| save_as       	| 截图保存地址   	|
+
+
 ### 文件删除
 
 
@@ -1823,6 +1920,98 @@ Bmob.User.upInfo(e.detail.userInfo).then(result => {
 
 
 
+### 小程序加密数据解密
+
+在小程序的开发过程中，获取一些隐私信息，需要解密处理，例如：获取手机号、运动步数、分享转发群Id，获取uuid等，为了大家更方便的拿到这些信息，SDK封装了解密方法。
+
+
+
+**请求示例：**
+
+1.获取手机号
+
+```
+//wxml
+<button open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">获取手机号 </button>
+
+//js
+ getPhoneNumber: function (res) {
+    wx.Bmob.User.decryption(res).then(res => {
+      console.log(res)
+  })
+    
+ // 解密后返回数据格式如下
+ // { "phoneNumber":"137xxxx6579", "purePhoneNumber":"137xxxx6579", "countryCode":"86", "watermark":{ "timestamp":1516762168, "appid":"wx094edexxxxx" } }
+  }
+```
+
+2.获取分享群ID
+
+```
+
+//获取分享群ID
+onShareAppMessage: function (res) {
+    wx.showShareMenu({
+      withShareTicket: true
+    })
+    var that = this;
+    if (res.from === 'button') {
+      // 来自页面内转发按钮
+      console.log(res.target)
+    }
+    return {
+      title: 'Bmob 示例',
+      path: 'pages/index/index',
+      success: function (res) {
+        wx.getShareInfo({
+          shareTicket: res.shareTickets,
+          success(res) {
+            // 调用解密
+            wx.Bmob.User.decryption(res).then(res => {
+              console.log(res)
+            })
+          }
+        })
+      },
+      fail: function (res) {
+        // 转发失败
+      }
+    }
+  }
+  
+//解密后返回数据格式如下
+{
+ "openGId": "OPENGID"
+}
+```
+
+3.解密运动步数
+
+```
+wx.getWeRunData({
+      success(res) {
+        wx.Bmob.User.decryption(res).then(res => {
+          console.log(res)
+        })
+      }
+    })
+//解密后返回数据格式如下
+{
+  "stepInfoList": [
+    {
+      "timestamp": 1445866601,
+      "step": 100
+    },
+    {
+      "timestamp": 1445876601,
+      "step": 120
+    }
+  ]
+}
+```
+
+
+
 
 
 ### 生成二维码 ###
@@ -1870,7 +2059,7 @@ Bmob.generateCode 参数列表
 
 **简介：**
 
-微信小程序检测违规内容
+微信小程序检测用户输入的内容是否违规，建议用户留言，评论，发布内容，调用此接口。
 
 **参数说明：**
 
@@ -1974,7 +2163,7 @@ Bmob.checkMsg(content).then(res => {
     });
 ****
 
-###  小程序付款到零钱##
+###  小程序付款到零钱
 
 **简介：**
 
@@ -2101,7 +2290,98 @@ var openId = wx.getStorageSync('openid');
     	error: "content is empty."
     }
 
+### 小程序解密
+
+#### 1.获取手机号
+
+```
+//wxml
+<button open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">获取手机号 </button>
+
+//js
+ getPhoneNumber: function (res) {
+    wx.Bmob.User.decryption(res).then(res => {
+      console.log(res)
+  })
+    
+ // 解密后返回数据格式如下
+ // { "phoneNumber":"137xxxx6579", "purePhoneNumber":"137xxxx6579", "countryCode":"86", "watermark":{ "timestamp":1516762168, "appid":"wx094edexxxxx" } }
+  }
+
+```
+
+#### 2.获取分享群ID
+
+```
+//获取分享群ID
+onShareAppMessage: function (res) {
+    wx.showShareMenu({
+      withShareTicket: true
+    })
+    var that = this;
+    if (res.from === 'button') {
+      // 来自页面内转发按钮
+      console.log(res.target)
+    }
+    return {
+      title: 'Bmob 示例',
+      path: 'pages/index/index',
+      success: function (res) {
+        wx.getShareInfo({
+          shareTicket: res.shareTickets,
+          success(res) {
+            // 调用解密
+            wx.Bmob.User.decryption(res).then(res => {
+              console.log(res)
+            })
+          }
+        })
+      },
+      fail: function (res) {
+        // 转发失败
+      }
+    }
+  }
+  
+//解密后返回数据格式如下
+{
+ "openGId": "OPENGID"
+}
+
+```
+
+#### 3.解密运动步数
+
+```
+wx.getWeRunData({
+      success(res) {
+        wx.Bmob.User.decryption(res).then(res => {
+          console.log(res)
+        })
+      }
+    })
+//解密后返回数据格式如下
+{
+  "stepInfoList": [
+    {
+      "timestamp": 1445866601,
+      "step": 100
+    },
+    {
+      "timestamp": 1445876601,
+      "step": 120
+    }
+  ]
+}
+
+```
+
+
+
+
+
 ### 微信主人通知 ###
+
 **简介：**
 
 微信主动推送通知，业务场景：比如你有APP，有人下单了，或者有人留言了。你可以收到微信推送通知。每日限制50条，如需更多，请工单联系客服
@@ -2208,6 +2488,8 @@ var openId = wx.getStorageSync('openid');
 ### 小程序下载域名
 
 由于最近微信封了~~*.upaiyun.com~~ 域名，如果你没做文件下载功能，只是显示图片，可以不填写。如果你需要做下载功能，在应用设置里面，可以开启独立域名， 开启后，填写到微信平台就好了，当然有时候你想用自己的域名，也是可以的，可以工单联系我们。
+
+
 
 ### 小程序客服消息
 

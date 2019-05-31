@@ -5,7 +5,7 @@ const Query = require('./query')
 const User = require('./user')
 const File = require('./file')
 const Pay = require('./pay')
-const socket = require('./socket')
+const Socket = require('./socket')
 
 const {
   generateCode,
@@ -46,7 +46,7 @@ Bmob.requestSmsCode = requestSmsCode
 // 验证短信验证码
 Bmob.verifySmsCode = verifySmsCode
 // 云函数
-Bmob.functions = functions
+Bmob.run = Bmob.functions = functions
 // 获取服务器时间
 Bmob.timestamp = timestamp
 // 密码重置(Email)
@@ -57,13 +57,12 @@ Bmob.resetPasswordBySmsCode = resetPasswordBySmsCode
 Bmob.updateUserPassword = updateUserPassword
 // APP推送
 Bmob.push = push
-
 // 小程序支付
 Bmob.Pay = new Pay()
 // 用户对象
 Bmob.User = new User()
 // 通讯
-Bmob.Socket = socket
+Bmob.Socket = () => new Socket()
 // 数据操作
 Bmob.Query = parmas => new Query(parmas)
 // 文件操作
@@ -78,7 +77,11 @@ Bmob.Pointer = parmas => new Pointer(parmas)
 Bmob.Relation = parmas => new Relation(parmas)
 
 if (Bmob.type === 'wx') {
-  wx.Bmob = Bmob
+  if (typeof (tt) !== 'undefined') {
+    tt.Bmob = Bmob
+  } else {
+    wx.Bmob = Bmob
+  }
 } else if (Bmob.type === 'h5') {
   window.Bmob = Bmob
 } else if (Bmob.type === 'hap') {

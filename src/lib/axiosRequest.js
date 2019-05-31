@@ -1,10 +1,15 @@
-const axios = require('../../node_modules/axios/index')
+/* eslint-disable */
+const axios = require('./axios/lib/axios')
 let Bmob = require('./bmob')
 
 const setHeader = (config) => {
+  let type = 'wechatApp'
+  if (Bmob.type === 'nodejs') {
+    type = 'cloudcode'
+  }
   let header = {
     'content-type': 'application/json',
-    'X-Bmob-SDK-Type': 'wechatApp',
+    'X-Bmob-SDK-Type': type,
     'X-Bmob-Application-Id': config.applicationId,
     'X-Bmob-REST-API-Key': config.applicationKey
   }
@@ -43,7 +48,7 @@ const request = (route, method = 'get', parma = {}) => {
     } else {
       serverData.data = parma
     }
-    server(serverData).then(({data}) => {
+    server(serverData).then(({ data }) => {
       if ((data.code && data.error) || data.error) {
         reject(data)
       }

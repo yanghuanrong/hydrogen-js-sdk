@@ -41,6 +41,57 @@ Bmob.initialize("你的Application ID", "你的REST API Key");
 
 https://bmob.github.io/hydrogen-js-sdk/#/?id=登陆
 
+
+#### 版本 v1.7.1
+
+**Note:**
+
+> - 编译后的的语法修改为es5
+> - bmob.min.*.js文件增加版本信息、更新日期
+
+**Note:**
+
+> - 支持今日头条小程序一键登陆
+> - 支持今日头条小程序access_token 获取
+> - 支持今日头条小程序文件上传等
+
+
+#### 版本 v1.6.7
+
+**Note:**
+
+> - 修复nodejs `XMLHttpRequest is not defined`的问题
+
+#### 版本 v1.6.6
+
+**Note:**
+
+> - 增加今日头条小程序支持
+> - 修复nodejs 缺少依赖包axios需要手动引入一次问题
+
+#### 版本 v1.6.5
+
+**Note:**
+
+> - 修复分组查询替换排序结果
+
+
+#### 版本 v1.6.4
+
+**Note:**
+
+> - 增加小视频视频截图功能
+> - 增加解密小程序数据接口
+> - 调用云函数增加支持Bmob.run方法
+
+#### 版本 v1.6.3
+
+**Note:**
+
+> - 修复快应用注册函数在特殊情况下，参数错乱问题
+> - 修复小程序文件上传路径返回字符串类型
+> - 增加登陆退出功能
+
 #### 版本 v1.6.2
 
 **Note:**
@@ -55,7 +106,6 @@ https://bmob.github.io/hydrogen-js-sdk/#/?id=登陆
 
 > - 修复relation只能关联用户表bug
 >
->   
 
 #### 版本 v1.6.0
 
@@ -86,7 +136,6 @@ https://bmob.github.io/hydrogen-js-sdk/#/?id=登陆
 >
 > - 修复openid多出双引号问题
 >
->   
 
 #### 版本 v1.4.4
 

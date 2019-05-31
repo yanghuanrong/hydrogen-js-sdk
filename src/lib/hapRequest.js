@@ -21,9 +21,13 @@ const request = (route, method = 'get', parma = {}) => {
     if (undefined === Bmob.User) {
       Bmob = require('./bmob')
     }
-    var current = Bmob.User.current()
+    let current = Bmob.User.current()
     if (current) {
       header['X-Bmob-Session-Token'] = current.sessionToken
+    }
+
+    if (typeof parma === 'object') {
+      parma = JSON.stringify(parma)
     }
 
     fetch.fetch({
